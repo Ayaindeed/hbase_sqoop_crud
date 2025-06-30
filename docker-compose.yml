@@ -1,0 +1,20 @@
+# docker-compose.yml
+version: "3.8"
+
+networks:
+  default:
+    external: true
+    name: hbase_pj_default
+
+services:
+  hbase-crud-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - HBASE_ZOOKEEPER_QUORUM=hbase
+      - HBASE_ZOOKEEPER_PROPERTY_CLIENTPORT=2181
+    ports:
+      - "5005:5005"
+    networks:
+      - default
