@@ -1,0 +1,45 @@
+name: Build and Test HBase CRUD App
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: sourcedb
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+      hbase:
+        image: harisekhon/hbase:1.4
+        ports:
+          - 2181:2181
+          - 16010:16010
+        options: >-
+          --health-cmd="curl -f http://localhost:16010 || exit 1"
+          --health-interval=30s
+          --health-timeout=10s
+          --health-retries=5
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Build Docker image
+        run: docker build -t hbase-crud-app .
+
+      - name: Run your Java app tests
+        run: docker run --rm hbase-crud-app java -jar app.jar  # Adjust to your test command
